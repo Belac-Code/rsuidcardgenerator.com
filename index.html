@@ -301,21 +301,12 @@
 <div class="panel">
   <h2>&#128266; ID Card Controls</h2>
 
-  <!-- Crest Upload -->
-  <div class="grp">
-    <label>School Logo / Crest</label>
-    <label class="file-upload">
-      <input type="file" id="inputCrest" accept="image/*" onchange="uploadCrest(event)">
-      <img class="thumb" id="crestThumb">
-      <span id="crestHint">Click to upload logo</span>
-    </label>
-  </div>
 
   <!-- Photo Upload -->
   <div class="grp">
     <label>Passport Photo</label>
     <label class="file-upload">
-      <input type="file" id="inputPhoto" accept="image/*" onchange="uploadPhoto(event)">
+      <input type="file" id="inputPhoto" accept="image/*"  onchange="uploadPhoto(event)">
       <img class="thumb" id="photoThumb">
       <span id="photoHint">Click to upload photo</span>
     </label>
@@ -331,7 +322,7 @@
   <!-- Full Name -->
   <div class="grp">
     <label>Full Name</label>
-    <input type="text" id="inName" value="KENISUO PEACEFUL WOLO"
+    <input type="text" id="inName" value="JOHN DOE"
            oninput="sync('vName', this.value)">
   </div>
 
@@ -390,7 +381,11 @@
     <!-- HEADER -->
     <div class="card-header">
       <div class="crest-circle" id="crestCircle">
-        <div class="crest-placeholder" id="crestPlaceholder">CREST</div>
+        <div class="crest-placeholder" id="crestPlaceholder">
+
+          <img src="rsus-logo.webp" style="width: 80px; height: 80px;"> 
+
+        </div>
       </div>
       <div class="univ-name" id="vUniv">RIVERS STATE UNIVERSITY</div>
 
@@ -399,7 +394,7 @@
         <div class="passport-frame" id="vPhoto">
           <span>No Photo</span>
         </div>
-        <div class="name-plate" id="vName">KENISUO PEACEFUL WOLO</div>
+        <div class="name-plate" id="vName">JOHN DOE</div>
       </div>
     </div>
 
@@ -433,8 +428,8 @@
     <!-- FOOTER -->
     <div class="card-footer">
       <div class="validity-pill">
-        <span class="vl">Validity Period: </span
-        ><span id="vValidity">2025/2026 - 2025/2026</span>
+        <span class="vl">Validity Period: </span>
+        <span id="vValidity">2025/2026 - 2025/2026</span>
       </div>
     </div>
 
