@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSU ID Card Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f172a;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 32px;
+    padding: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* ── CONTROL PANEL ── */
+  .panel {
+    background: #1e293b;
+    border-radius: 14px;
+    padding: 24px;
+    width: 320px;
+    flex-shrink: 0;
+    color: #f1f5f9;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .panel h2 {
+    font-size: 17px;
+    color: #38bdf8;
+    border-bottom: 1.5px solid #334155;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+    letter-spacing: 0.3px;
+  }
+  .grp { margin-bottom: 14px; }
+  .grp label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #94a3b8;
+    margin-bottom: 5px;
+  }
+  .grp input[type="text"],
+  .grp textarea {
+    width: 100%;
+    padding: 9px 10px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: #f1f5f9;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .grp input[type="text"]:focus,
+  .grp textarea:focus { border-color: #38bdf8; }
+  .grp textarea { resize: vertical; }
+
+  .file-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    border: 1.5px dashed #334155;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    background: #0f172a;
+  }
+  .file-upload:hover { border-color: #38bdf8; }
+  .file-upload input { display: none; }
+  .file-upload span { font-size: 11px; color: #64748b; }
+  .file-upload .thumb {
+    width: 50px; height: 50px;
+    border-radius: 6px;
+    background: #1e293b;
+    object-fit: cover;
+    display: none;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 13px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: #1d4ed8; }
+
+  /* ── PREVIEW WRAP ── */
+  .preview-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* ── ID CARD ── */
+  .id-card {
+    width: 340px;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER: gear background ── */
+  .card-header {
+    background-color: #cfe8f7;
+    position: relative;
+    padding: 20px 20px 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 200px;
+  }
+
+  .card-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url(background.png);
+    background-repeat: no-repeat;
+   background-size: cover;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .crest-circle {
+    width: 68px;
+    height: 68px;
+    border-radius: 0%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+  .crest-circle img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    border-radius: 0%;
+    border:none;
+  
+  
+  
+  }
+  .crest-placeholder {
+    font-size: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .univ-name {
+    font-size: 17px;
+    font-weight: 900;
+    color: #0b2545;
+    font-family: Arial, sans-serif;
+    letter-spacing: 0.3px;
+    margin-top: 8px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── PHOTO BLOCK ── */
+  .photo-block {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 14px;
+  }
+
+  .passport-frame {
+    width: 148px;
+    height: 170px;
+    border: 2.5px solid #0b2545;
+    border-bottom: none;
+    background: #dde3ea;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center top;
+    flex-shrink: 0;
+  }
+  .passport-frame span { font-size: 10px; color: #64748b; font-weight: 600; }
+
+  .name-plate {
+    width: 148px;
+    border-left: 2.5px solid #0b2545;
+    border-right: 2.5px solid #0b2545;
+    border-bottom: 2.5px solid #0b2545;
+    background: #fff;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-weight: 900;
+    font-size: 13.5px;
+    text-transform: uppercase;
+    padding: 6px 8px;
+    line-height: 1.25;
+    color: #000;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── BLUE SEPARATOR BAR ── */
+  .blue-bar {
+    background: #0b2545;
+    height: 50px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  /* ── DATA FIELDS ── */
+  .data-section {
+    background: #fff;
+    padding: 12px 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    flex-grow: 1;
+  }
+  .data-row { display: flex; align-items: flex-start; }
+  .data-label {
+    font-family: Arial, sans-serif;
+    font-size: 11.5px;
+    font-weight: 900;
+    color: #000;
+    text-transform: uppercase;
+    width: 110px;
+    flex-shrink: 0;
+    padding-top: 1px;
+    line-height: 1.4;
+  }
+  .data-value {
+    font-family: Arial, sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #000;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: pre-line;
+  }
+
+  /* ── FOOTER ── */
+  .card-footer {
+    background: #0b2545;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: center;
+  }
+  .validity-pill {
+    background: #111;
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-family: Arial, sans-serif;
+    border: 1px solid #222;
+  }
+  .validity-pill .vl { color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     CONTROL PANEL
+════════════════════════════════════ -->
+<div class="panel">
+  <h2>&#128266; ID Card Controls</h2>
+
+  <!-- Crest Upload -->
+  <div class="grp">
+    <label>School Logo / Crest</label>
+    <label class="file-upload">
+      <input type="file" id="inputCrest" accept="image/*" onchange="uploadCrest(event)">
+      <img class="thumb" id="crestThumb">
+      <span id="crestHint">Click to upload logo</span>
+    </label>
+  </div>
+
+  <!-- Photo Upload -->
+  <div class="grp">
+    <label>Passport Photo</label>
+    <label class="file-upload">
+      <input type="file" id="inputPhoto" accept="image/*" onchange="uploadPhoto(event)">
+      <img class="thumb" id="photoThumb">
+      <span id="photoHint">Click to upload photo</span>
+    </label>
+  </div>
+
+  <!-- University Name -->
+  <div class="grp">
+    <label>University Name</label>
+    <input type="text" id="inUniv" value="RIVERS STATE UNIVERSITY"
+           oninput="sync('vUniv', this.value)">
+  </div>
+
+  <!-- Full Name -->
+  <div class="grp">
+    <label>Full Name</label>
+    <input type="text" id="inName" value="KENISUO PEACEFUL WOLO"
+           oninput="sync('vName', this.value)">
+  </div>
+
+  <!-- Faculty -->
+  <div class="grp">
+    <label>Faculty</label>
+    <textarea id="inFaculty" rows="2"
+              oninput="sync('vFaculty', this.value)">ADMINISTRATION AND MANAGEMENT</textarea>
+  </div>
+
+  <!-- Department -->
+  <div class="grp">
+    <label>Department</label>
+    <textarea id="inDept" rows="2"
+              oninput="sync('vDept', this.value)">EMPLOYMENT RELATIONS AND HUMAN RESOURCE MANAGEMENT</textarea>
+  </div>
+
+  <!-- Programme -->
+  <div class="grp">
+    <label>Programme</label>
+    <textarea id="inProg" rows="2"
+              oninput="sync('vProg', this.value)">FULL TIME UNDER GRADUATE&#10;BACHELOR OF SCIENCE</textarea>
+  </div>
+
+  <!-- Matric No. -->
+  <div class="grp">
+    <label>Matric No.</label>
+    <input type="text" id="inMatric" value="DE.2024/0659"
+           oninput="sync('vMatric', this.value)">
+  </div>
+
+  <!-- ID CODE -->
+  <div class="grp">
+    <label>CODE ID</label>
+    <input type="text" id="inCode" value="0000"
+           oninput="sync('vCode', this.value)">
+  </div>
+
+  <!-- Validity -->
+  <div class="grp">
+    <label>Validity Period</label>
+    <input type="text" id="inValidity" value="2025/2026 - 2025/2026"
+           oninput="document.getElementById('vValidity').textContent = this.value">
+  </div>
+
+  <button class="btn" onclick="downloadCard()">&#11015; Generate &amp; Download JPEG</button>
+</div>
+
+
+<!-- ══════════════════════════════════
+     ID CARD PREVIEW
+════════════════════════════════════ -->
+<div class="preview-wrap">
+  <div class="id-card" id="idCard">
+
+    <!-- HEADER -->
+    <div class="card-header">
+      <div class="crest-circle" id="crestCircle">
+        <div class="crest-placeholder" id="crestPlaceholder">CREST</div>
+      </div>
+      <div class="univ-name" id="vUniv">RIVERS STATE UNIVERSITY</div>
+
+      <!-- PHOTO + NAME PLATE -->
+      <div class="photo-block">
+        <div class="passport-frame" id="vPhoto">
+          <span>No Photo</span>
+        </div>
+        <div class="name-plate" id="vName">KENISUO PEACEFUL WOLO</div>
+      </div>
+    </div>
+
+    <!-- BLUE BAR -->
+    <div class="blue-bar"></div>
+
+    <!-- DATA FIELDS -->
+    <div class="data-section">
+      <div class="data-row">
+        <div class="data-label">Faculty:</div>
+        <div class="data-value" id="vFaculty">ADMINISTRATION AND MANAGEMENT</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Department:</div>
+        <div class="data-value" id="vDept">EMPLOYMENT RELATIONS AND HUMAN RESOURCE MANAGEMENT</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Programme:</div>
+        <div class="data-value" id="vProg">FULL TIME UNDER GRADUATE<br>BACHELOR OF SCIENCE</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Matric No.:</div>
+        <div class="data-value" id="vMatric">DE.2024/0659</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">ID CODE:</div>
+        <div class="data-value" id="vCode">0000</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="card-footer">
+      <div class="validity-pill">
+        <span class="vl">Validity Period: </span
+        ><span id="vValidity">2025/2026 - 2025/2026</span>
+      </div>
+    </div>
+
+  </div><!-- /#idCard -->
+</div><!-- /.preview-wrap -->
+
+
+<script>
+  /* ── Live sync: text/textarea → card field ── */
+  function sync(id, val) {
+    document.getElementById(id).innerHTML = val.replace(/\n/g, '<br>');
+  }
+
+  /* ── Crest logo upload ── */
+  function uploadCrest(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const circle = document.getElementById('crestCircle');
+      circle.innerHTML = '<img src="' + ev.target.result + '">';
+      const thumb = document.getElementById('crestThumb');
+      thumb.src = ev.target.result;
+      thumb.style.display = 'block';
+      document.getElementById('crestHint').textContent = 'Logo uploaded \u2713';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* ── Passport photo upload ── */
+  function uploadPhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const frame = document.getElementById('vPhoto');
+      frame.style.backgroundImage = "url('" + ev.target.result + "')";
+      frame.innerHTML = '';
+      const thumb = document.getElementById('photoThumb');
+      thumb.src = ev.target.result;
+      thumb.style.display = 'block';
+      document.getElementById('photoHint').textContent = 'Photo uploaded \u2713';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* ── Download as high-res JPEG ── */
+  function downloadCard() {
+    const card = document.getElementById('idCard');
+    html2canvas(card, {
+      scale: 3,
+      useCORS: true,
+      logging: false,
+      backgroundColor: null
+    }).then(function(canvas) {
+      const img = canvas.toDataURL('image/jpeg', 0.96);
+      const a = document.createElement('a');
+      const name = document.getElementById('inName').value.trim().replace(/\s+/g, '_') || 'Student';
+      a.download = 'ID_' + name + '.jpeg';
+      a.href = img;
+      a.click();
+    });
+  }
+</script>
+</body>
+</html>
